@@ -2,9 +2,9 @@
 #PBS -l nodes=1:ppn=16,walltime=00:10:00
 #PBS -N TESTID_N_T_C
 #PBS -j oe
+#PBS -m be
+#PBS -M jmccombs@iu.edu
 #ZPBS -q debug
-#ZPBS -m be
-#ZPBS -M jmccombs@iu.edu
 
 ################################################################################
 # File: scaleTestH2O.bash
@@ -48,7 +48,7 @@ PORT_RANGE_START=54000
 PORT_RANGE_END=65534
 
 # Change this to the location of your h2o jar file
-H2O_JAR=${HOME}/Karst/h2o-3.10.3.4/h2o.jar
+H2O_JAR=${HOME}/h2o-3.10.3.4/h2o.jar
 
 # Change this to the location of your pubmed directory where
 # the pubmed python package directory exists and the
@@ -74,12 +74,14 @@ test_set=${PBS_JOBNAME%%_*}
 num_files=${test_set%%"files"}
 # Compute the number of documents -- 30000 per file
 num_docs=$(($num_files*30000))
-# Get the number of nodes and threads per node
+# Get the number of nodes, threads, and clusters
 test_id=${PBS_JOBNAME#*_}
 # Get the number of nodes
 num_nodes=${test_id%%_*}
+# Trim off the number of nodes
+test_id_clipped=${test_id#*_}
 # Get the number of threads
-num_threads=${test_id##*_}
+num_threads=${test_id_clipped%%_*}
 # Set host and ip file names
 host_file=hostfile_${PBS_JOBID}
 ip_file=ipfile_${PBS_JOBID}
@@ -202,8 +204,8 @@ echo "Launching H2O host..."
 pbsdsh -v -u $SOURCE_DIR/launchH2O.bash $H2O_JAR $((10#$num_threads)) &
 pbsdsh_pid=$!
 
-echo "Sleeping for 40"
-sleep 40
+echo "Sleeping for 100"
+sleep 100
 echo "Starting python..."
 
 # Run it!
